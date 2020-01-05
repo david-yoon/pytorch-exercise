@@ -45,14 +45,15 @@ class DataText(Dataset):
         
     def load_data(self, text_trans, label):
      
-        print ('load data : ' + text_trans + ' ' + label)
+        print ('[DEBUG] load data : ' + text_trans + ' ' + label)
 
         # load dataset
         tmp_text_trans         = np.load(self.params.DATA_PATH + text_trans)
-        tmp_label              = np.load(self.params.DATA_PATH + label)
+        tmp_labels             = np.load(self.params.DATA_PATH + label)
 
-        list_trans = []
+        list_trans     = []
         list_text_seqN = []
+        list_label     = []
         
         for text in tmp_text_trans:
             
@@ -68,8 +69,16 @@ class DataText(Dataset):
                 seqN = self.params.ENCODER_SIZE
 
             list_text_seqN.append(seqN)
+            
+        '''
+        for tmp_label in tmp_labels:
+            
+            tmp = torch.zeros(self.params.N_CATEGORY, dtype=torch.float16)
+            tmp[tmp_label] = 1
+            list_label.append(tmp)
+        '''
         
-        return torch.as_tensor(list_trans), torch.as_tensor(list_text_seqN), torch.from_numpy(tmp_label)
+        return torch.as_tensor(list_trans), torch.as_tensor(list_text_seqN), torch.from_numpy(tmp_labels)
 
 
     def __getitem__(self, index):

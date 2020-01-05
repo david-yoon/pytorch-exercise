@@ -19,7 +19,7 @@ class ModelText(nn.Module):
     def __init__(self,
                  params                
                 ):
-        print('[object created] ', self.__class__.__name__)
+        print('[DEBUG][object created] ', self.__class__.__name__)
         
         super().__init__()
         
@@ -46,7 +46,7 @@ class ModelText(nn.Module):
 
 
     def _create_embedding(self):
-        print ('[launch-text] create embedding')
+        print ('[DEBUG][launch-text] create embedding')
         
         if self.use_glove == 1:
             self.fn_embed = nn.Embedding.from_pretrained(embeddings=pretrained_embeds,
@@ -59,7 +59,7 @@ class ModelText(nn.Module):
                                         )
     
     def _create_gru_encoder(self):
-        print ('[launch-text] create text_encoder (GRU):')
+        print ('[DEBUG][launch-text] create text_encoder (GRU):')
         
         self.fn_encoder = nn.GRU(input_size  = self.embed_dim,
                                    hidden_size = self.hidden_dim,
@@ -72,7 +72,7 @@ class ModelText(nn.Module):
 
 
     def _create_output_layers(self):
-        print ('[launch-text] create output projection layer')
+        print ('[DEBUG][launch-text] create output projection layer')
 
         # output * M + b
         self.fn_output = nn.Linear(in_features = self.hidden_dim,
@@ -95,16 +95,8 @@ class ModelText(nn.Module):
         final_output = self.fn_output(h_n.squeeze())
         
         return final_output
-        
-    '''
-    def build_graph_multi(self):
-        print('[object created] ', self.__class__.__name__)
-        
-        self._create_placeholders()
-        self._create_embedding()
-        self._use_external_embedding()
-        self._create_gru_model() 
-        
-        if self.attn      : self._add_attn()
-        if self.ltc :  self._add_LTC_method()
-    '''
+
+    
+    
+    
+    
