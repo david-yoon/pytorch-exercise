@@ -17,12 +17,14 @@ from params import *
 class ModelText(nn.Module):
     
     def __init__(self,
-                 params                
+                 params,
+                 device
                 ):
         print('[DEBUG][object created] ', self.__class__.__name__)
         
         super().__init__()
         
+        self.device       = device
         self.params       = params
         self.batch_size   = self.params.BATCH_SIZE
         self.dic_size     = self.params.DIC_SIZE

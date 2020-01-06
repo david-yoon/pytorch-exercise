@@ -3,6 +3,7 @@
 import torch
 import numpy as np
 from torch.utils.data import Dataset
+from torch.utils.data import TensorDataset
 from params import *
 
 
@@ -18,19 +19,20 @@ class DataText(Dataset):
         assert dataset_type in ['train', 'dev', 'test']
         
         self.params = params
+        self.dataset_type = dataset_type
         
         # load data
-        if dataset_type == 'train':
-            self.trans, self.seqN, self.label = self.load_data(self.params.DATA_TRAIN_TRANS,
-                                                    self.params.DATA_TRAIN_LABEL)
+        if self.dataset_type == 'train':
+            self.dataset = self.load_data(self.params.DATA_TRAIN_TRANS,
+                                                self.params.DATA_TRAIN_LABEL)
         
-        elif dataset_type == 'dev':
-            self.trans, self.seqN, self.label  = self.load_data(self.params.DATA_DEV_TRANS,
-                                                     self.params.DATA_DEV_LABEL)
+        elif self.dataset_type == 'dev':
+            self.dataset  = self.load_data(self.params.DATA_DEV_TRANS,
+                                               self.params.DATA_DEV_LABEL)
         
-        elif dataset_type == 'test':
-            self.trans, self.seqN, self.label  = self.load_data(self.params.DATA_TEST_TRANS,
-                                                     self.params.DATA_TEST_LABEL)
+        elif self.dataset_type == 'test':
+            self.dataset  = self.load_data(self.params.DATA_TEST_TRANS,
+                                                self.params.DATA_TEST_LABEL)
        
         self.dic = {}
         self.dic_size = 0
@@ -78,14 +80,17 @@ class DataText(Dataset):
             list_label.append(tmp)
         '''
         
-        return torch.as_tensor(list_trans), torch.as_tensor(list_text_seqN), torch.from_numpy(tmp_labels)
+        return TensorDataset(torch.as_tensor(list_trans),
+                             torch.as_tensor(list_text_seqN),
+                             torch.from_numpy(tmp_labels)
+                             )
 
 
     def __getitem__(self, index):
-        return self.trans[index], self.seqN[index], self.label[index]
+        return self.dataset[index]
             
 
     def __len__(self):
-        return len(self.trans)
+        return len(self.dataset)
     
     
