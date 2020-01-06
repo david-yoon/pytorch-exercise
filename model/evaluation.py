@@ -29,7 +29,7 @@ from params import *
         accr         : accuracy
         
 """
-def evaluate(model, data_loader):
+def evaluate(params, model, data_loader):
     
     model.eval()
     
@@ -42,9 +42,9 @@ def evaluate(model, data_loader):
 
         for b_trans, b_seqN, b_label in data_loader:
 
-            b_trans = b_trans.to(model.device)
-            b_seqN  = b_seqN.to(model.device)
-            b_label = b_label.to(model.device)
+            b_trans = b_trans.to(params.DEVICE)
+            b_seqN  = b_seqN.to(params.DEVICE)
+            b_label = b_label.to(params.DEVICE)
             
             try:
                 b_pred = model(b_trans, b_seqN)
@@ -66,7 +66,7 @@ def evaluate(model, data_loader):
 
         
         # for log
-        if model.params.TEST_LOG_FOR_ANALYSIS:
+        if params.TEST_LOG_FOR_ANALYSIS:
             with open( '../analysis/inference_log/mult_attn.txt', 'w' ) as f:
                 f.write( ' '.join( [str(x) for x in list_pred] ) )
 
@@ -78,11 +78,11 @@ def evaluate(model, data_loader):
         # weighted : ignore class unbalance
         accr_WA = precision_score(y_true=list_label.tolist(),
                                y_pred=list_pred.tolist(),
-                               average=model.params.WA)
+                               average=params.WA)
 
         accr_UA = precision_score(y_true=list_label.tolist(),
                                y_pred=list_pred.tolist(),
-                               average=model.params.UA)
+                               average=params.UA)
 
         sum_batch_ce = np.sum( list_loss )
 
