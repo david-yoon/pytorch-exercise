@@ -94,10 +94,9 @@ class ModelText(nn.Module):
                                                            )
                                       )
         
-        final_output = self.fn_output(h_n.squeeze())
+        final_output = self.fn_output(h_n.squeeze(0))
         
         return final_output
-
     
     
     
