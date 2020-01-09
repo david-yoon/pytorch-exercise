@@ -197,8 +197,10 @@ def main(params,
                       hidden_dim   = params.HIDDEN_DIM,
                       num_layers   = params.NUM_LAYER,
                       num_category = params.N_CATEGORY,
+                      dr           = params.DR,
                       use_glove    = params.USE_GLOVE,
-                      dr           = params.DR
+                      glove_embedding = dataset_train.load_glove(),
+                      embedding_finetune = params.EMBEDDING_FINETUNE
                       )
 
     model.to(params.DEVICE)
@@ -222,6 +224,7 @@ if __name__ == '__main__':
     
     # Text
     p.add_argument('--use_glove', type=int, default=0)
+    p.add_argument('--embedding_finetune', type=int, default=1)
     p.add_argument('--encoder_size_text', type=int, default=750)
     p.add_argument('--num_layer_text', type=int, default=1)
     p.add_argument('--hidden_dim_text', type=int, default=50)
@@ -235,6 +238,7 @@ if __name__ == '__main__':
     _params.BATCH_SIZE   = args.batch_size
     _params.LR           = args.lr
     _params.USE_GLOVE    = args.use_glove
+    _params.EMBEDDING_FINETUNE = args.embedding_finetune
     _params.ENCODER_SIZE = args.encoder_size_text
     _params.NUM_LAYER    = args.num_layer_text
     _params.HIDDEN_DIM   = args.hidden_dim_text
@@ -245,9 +249,9 @@ if __name__ == '__main__':
         _params.MAX_TRAIN_STEPS = args.max_train_steps
         print('[INFO] max_train_steps:\t', _params.MAX_TRAIN_STEPS)
     
-    embed_train = ''
-    if _params.EMBEDDING_TRAIN == False:
-        embed_train = 'F'
+    glove_finetune = ''
+    if _params.EMBEDDING_FINETUNE == False:
+        glove_finetune = 'F'
     
     
     graph_name = args.graph_prefix + \
@@ -256,7 +260,7 @@ if __name__ == '__main__':
                     '_esT' + str(args.encoder_size_text) + \
                     '_LT' + str(args.num_layer_text) + \
                     '_HT' + str(args.hidden_dim_text) + \
-                    '_G' + str(args.use_glove) + embed_train + \
+                    '_G' + str(args.use_glove) + glove_finetune + \
                     '_drT' + str(args.dr_text)
     
     graph_name = graph_name + '_' + datetime.datetime.now().strftime("%m-%d-%H-%M")
@@ -270,6 +274,10 @@ if __name__ == '__main__':
     print('[INFO]-T encoder_size:\t', _params.ENCODER_SIZE)
     print('[INFO]-T num_layer:\t', _params.NUM_LAYER)
     print('[INFO]-T hidden_dim:\t', _params.HIDDEN_DIM)
+    
+    if args.use_glove == 1:
+        print('[INFO]-Glove Finetune:\t', _params.EMBEDDING_FINETUNE)
+    
     print('[INFO]-T dr:\t\t', _params.DR)
 
     main(params = _params,

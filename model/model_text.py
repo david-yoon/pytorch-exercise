@@ -22,8 +22,10 @@ class ModelText(nn.Module):
                  hidden_dim,
                  num_layers,
                  num_category,
+                 dr,
                  use_glove,
-                 dr
+                 glove_embedding = None,
+                 embedding_finetune = True
                 ):
         print('[DEBUG][object created] ', self.__class__.__name__)
         
@@ -32,19 +34,22 @@ class ModelText(nn.Module):
         if use_glove == 1:
             embed_dim = 300
             
+        print('[DEBUG] Embedding size:', embed_dim)
         
         # bulid model
-        self._create_embedding(dic_size, embed_dim, use_glove)
+        self._create_embedding(dic_size, embed_dim, use_glove, glove_embedding, embedding_finetune)
         self._create_gru_encoder(embed_dim, hidden_dim, num_layers, dr)
         self._create_output_layers(hidden_dim, num_category)
 
 
-    def _create_embedding(self, dic_size, embed_dim, use_glove):
-        print ('[DEBUG][launch-text] create embedding')
+    def _create_embedding(self, dic_size, embed_dim, use_glove, glove_embedding, embedding_finetune):
+        print('[DEBUG][launch-text] create embedding')
+        print('[DEBUG] Glove finetuning:', embedding_finetune)
         
         if use_glove == 1:
-            self.fn_embed = nn.Embedding.from_pretrained(embeddings=pretrained_embeds,
-                                                         freeze=False
+            self.fn_embed = nn.Embedding.from_pretrained(embeddings=glove_embedding,
+                                                         freeze=embedding_finetune,
+                                                         padding_idx=0
                                                         )
         else:
             self.fn_embed = nn.Embedding(num_embeddings=dic_size,

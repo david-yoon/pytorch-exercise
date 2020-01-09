@@ -23,15 +23,15 @@ class DataText(Dataset):
         
         # load data
         if self.dataset_type == 'train':
-            self.dataset = self.load_data(self.params.DATA_TRAIN_TRANS,
+            self.dataset = self._load_data(self.params.DATA_TRAIN_TRANS,
                                                 self.params.DATA_TRAIN_LABEL)
         
         elif self.dataset_type == 'dev':
-            self.dataset  = self.load_data(self.params.DATA_DEV_TRANS,
+            self.dataset  = self._load_data(self.params.DATA_DEV_TRANS,
                                                self.params.DATA_DEV_LABEL)
         
         elif self.dataset_type == 'test':
-            self.dataset  = self.load_data(self.params.DATA_TEST_TRANS,
+            self.dataset  = self._load_data(self.params.DATA_TEST_TRANS,
                                                 self.params.DATA_TEST_LABEL)
        
         self.dic = {}
@@ -45,7 +45,15 @@ class DataText(Dataset):
         self.dic_size = len( self.dic )
 
         
-    def load_data(self, text_trans, label):
+    def load_glove(self):
+        if self.params.USE_GLOVE == 0:
+            return None
+        
+        print('[INFO] load Glove pretrained model')
+        return torch.tensor(np.load(open(self.params.DATA_PATH + self.params.GLOVE, 'rb')))
+        
+        
+    def _load_data(self, text_trans, label):
      
         print ('[DEBUG] load data : ' + text_trans + ' ' + label)
 
