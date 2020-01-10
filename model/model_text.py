@@ -56,9 +56,10 @@ class ModelText(nn.Module):
                                          embedding_dim=embed_dim,
                                          padding_idx=0
                                         )
+            
     
     def _create_gru_encoder(self, intput_dim, hidden_dim, num_layers, dr):
-        print ('[DEBUG][launch-text] create text_encoder (GRU):')
+        print('[DEBUG][launch-text] create text_encoder (GRU):')
         
         self.fn_encoder = nn.GRU(input_size    = intput_dim,
                                    hidden_size = hidden_dim,
@@ -71,7 +72,7 @@ class ModelText(nn.Module):
 
 
     def _create_output_layers(self, in_features_dim, out_features_dim):
-        print ('[DEBUG][launch-text] create output projection layer')
+        print('[DEBUG][launch-text] create output projection layer')
 
         # output * M + b
         self.fn_output = nn.Linear(in_features = in_features_dim,
@@ -84,6 +85,8 @@ class ModelText(nn.Module):
         
         embed = self.fn_embed(inputs)
         
+        # outputs: (seq_len, batch, input_size)
+        # h_n:     (num_layers * num_directions, batch, hidden_size)
         outputs, h_n = self.fn_encoder(pack_padded_sequence(input=embed,
                                                             lengths=seqN,
                                                             batch_first=True,
@@ -91,7 +94,8 @@ class ModelText(nn.Module):
                                                            )
                                       )
         
-        final_output = self.fn_output(h_n.squeeze(0))
+        # oonsider only the last layer
+        final_output = self.fn_output(h_n[-1])
         
         return final_output
     
