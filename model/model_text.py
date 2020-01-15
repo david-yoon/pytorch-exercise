@@ -87,7 +87,7 @@ class ModelText(nn.Module):
         
         # outputs: (seq_len, batch, input_size)
         # h_n:     (num_layers * num_directions, batch, hidden_size)
-        outputs, h_n = self.fn_encoder(pack_padded_sequence(input=embed,
+        packed_outputs, h_n = self.fn_encoder(pack_padded_sequence(input=embed,
                                                             lengths=seqN,
                                                             batch_first=True,
                                                             enforce_sorted=False
