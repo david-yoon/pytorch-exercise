@@ -13,6 +13,7 @@ from model_text import *
 from data_text import *
 from params import *
 from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
 from evaluation import evaluate
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -46,7 +47,10 @@ def train_model(params, model, dataset_train, dataset_dev, dataset_test, valid_f
         
     # if exists check point, starts from the check point
     # TO DO
-            
+           
+    # tensorboard
+    writer = SummaryWriter('./graph/'+graph_dir_name)
+        
     initial_time = time.time()
         
     min_ce = 1000000
@@ -84,6 +88,7 @@ def train_model(params, model, dataset_train, dataset_dev, dataset_test, valid_f
             try:
                 # run train 
                 b_loss_train = train_step(params, model, b_trans, b_seqN, b_label, optimizer, criterion)
+                writer.add_scalar('loss/train', b_loss_train, index)
                 
             except Exception as e:
                 print ("excepetion occurs in train step: ", e)
@@ -96,6 +101,8 @@ def train_model(params, model, dataset_train, dataset_dev, dataset_test, valid_f
                                                   model=model, 
                                                   data_loader=data_loader_dev
                                                  )
+                writer.add_scalar('loss/dev', dev_ce, index)
+                writer.add_scalar('accuracy/dev', dev_WA, index)
 
 
                 if params.IS_TRAGET_OBJECTIVE_WA : target = dev_WA
@@ -114,7 +121,7 @@ def train_model(params, model, dataset_train, dataset_dev, dataset_test, valid_f
                     test_ce, test_WA, test_UA = evaluate(params=params,
                                                          model=model, 
                                                          data_loader=data_loader_test
-                                                        )
+                                                        )                    
 
                     target_dev_WA  = dev_WA
                     target_dev_UA  = dev_UA
@@ -142,6 +149,7 @@ def train_model(params, model, dataset_train, dataset_dev, dataset_test, valid_f
                     '{:.3f}'.format(test_UA) + '\t' + \
                     " loss: " + '{:.2f}'.format(dev_ce))
 
+    writer.close()
 
     print ('Total steps : {}'.format(index) )
 
@@ -162,6 +170,7 @@ def train_model(params, model, dataset_train, dataset_dev, dataset_test, valid_f
                 '{:.3f}'.format(target_dev_UA) + '\t' + \
                 '{:.3f}'.format(target_test_WA) + '\t' + \
                 '{:.3f}'.format(target_test_UA) )
+        
 
 
 def create_dir(dir_name):
