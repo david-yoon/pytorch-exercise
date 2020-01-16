@@ -40,14 +40,14 @@ def evaluate(params, model, data_loader):
         list_pred = []
         list_label = []
 
-        for b_trans, b_seqN, b_label in data_loader:
+        for b_trans, b_seqMask, b_label in data_loader:
 
             b_trans = b_trans.to(params.DEVICE)
-            b_seqN  = b_seqN.to(params.DEVICE)
+            b_seqMask = b_seqMask.to(params.DEVICE)
             b_label = b_label.to(params.DEVICE)
             
             try:
-                b_pred = model(b_trans, b_seqN)
+                b_pred = model(b_trans, b_seqMask)
                 b_loss = criterion(b_pred, b_label)
 
             except Exception as e:

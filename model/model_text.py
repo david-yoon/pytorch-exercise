@@ -9,6 +9,7 @@ import torch
 import torch.nn as nn
 from torch.nn.utils.rnn import pack_padded_sequence, pad_sequence, pad_packed_sequence
 
+from model_attention_pytorch import luong_attention
 from random import shuffle
 import numpy as np
 
@@ -25,11 +26,18 @@ class ModelText(nn.Module):
                  dr,
                  use_glove,
                  glove_embedding = None,
-                 embedding_finetune = True
+                 embedding_finetune = True,
+                 use_attention=0
                 ):
         print('[DEBUG][object created] ', self.__class__.__name__)
         
         super().__init__()
+        
+        self.use_attention = use_attention
+        
+        if self.use_attention:
+            print('[DEBUG] create attention memory, dim: ', hidden_dim)
+            self.memory = torch.randn([1, hidden_dim], requires_grad=True)
         
         if use_glove == 1:
             embed_dim = 300
@@ -81,9 +89,10 @@ class ModelText(nn.Module):
                                   )
 
     
-    def forward(self, inputs, seqN):
+    def forward(self, inputs, seq_mask):
         
         embed = self.fn_embed(inputs)
+        seqN  = torch.sum(seq_mask, dim=-1)
         
         # outputs: (seq_len, batch, input_size)
         # h_n:     (num_layers * num_directions, batch, hidden_size)
@@ -94,8 +103,18 @@ class ModelText(nn.Module):
                                                            )
                                       )
         
-        # oonsider only the last layer
-        final_output = self.fn_output(h_n[-1])
+        outputs, output_lengths = pad_packed_sequence(packed_outputs, batch_first=True)
+        valid_len = outputs.shape[1]  # [batch, seqN (vary), dim]
+        
+        if self.use_attention:
+            self.query = self.memory.unsqueeze(-1)
+            self.key   = outputs
+            self.weighted_sum, self.norm_b_sim = luong_attention(self.key, self.query, seq_mask[:,:valid_len])
+            final_output = self.weighted_sum
+        
+        else:
+            # oonsider only the last layer
+            final_output = self.fn_output(h_n[-1])
         
         return final_output
     

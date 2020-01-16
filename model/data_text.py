@@ -63,6 +63,7 @@ class DataText(Dataset):
 
         list_trans     = []
         list_text_seqN = []
+        list_text_seqMask = []
         list_label     = []
         
         for text in tmp_text_trans:
@@ -78,7 +79,11 @@ class DataText(Dataset):
             else :                                                    # no-pad
                 seqN = self.params.ENCODER_SIZE
 
-            list_text_seqN.append(seqN)
+            seqMask = np.zeros(self.params.ENCODER_SIZE)
+            seqMask[:seqN] = 1
+            
+            #list_text_seqN.append(seqN)
+            list_text_seqMask.append(seqMask.tolist())
             
         '''
         for tmp_label in tmp_labels:
@@ -89,7 +94,7 @@ class DataText(Dataset):
         '''
         
         return TensorDataset(torch.as_tensor(list_trans),
-                             torch.as_tensor(list_text_seqN),
+                             torch.as_tensor(list_text_seqMask),
                              torch.from_numpy(tmp_labels)
                              )
 

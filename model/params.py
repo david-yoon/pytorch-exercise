@@ -58,6 +58,7 @@ class Params:
     N_SEQ_MAX_NLP      = 128    # normal 128, ASR 90
     EMBED_DIM          = 100    # when using glove it goes to 300 automatically
     EMBEDDING_FINETUNE = False  # True is better
+    ATTENTION          = 0      # create an internal memory to attend
     
     
     ################################

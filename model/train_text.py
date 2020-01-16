@@ -20,15 +20,15 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 # for training         
-def train_step(params, model, b_trans, b_seqN, b_label, optimizer, criterion):
+def train_step(params, model, b_trans, b_seqMask, b_label, optimizer, criterion):
     
     model.train()
     
     b_trans = b_trans.to(params.DEVICE)
-    b_seqN  = b_seqN.to(params.DEVICE)
+    b_seqMask = b_seqMask.to(params.DEVICE)
     b_label = b_label.to(params.DEVICE)
     
-    b_pred = model(b_trans, b_seqN)
+    b_pred = model(b_trans, b_seqMask)
     b_loss = criterion(b_pred, b_label)
     
     optimizer.zero_grad()
@@ -79,7 +79,7 @@ def train_model(params, model, dataset_train, dataset_dev, dataset_test, valid_f
     index = 0
     while (index < params.MAX_TRAIN_STEPS and early_stop_count > 0):
 
-        for b_trans, b_seqN, b_label in data_loader_train:
+        for b_trans, b_seqMask, b_label in data_loader_train:
         
             index = index + 1
             if index >= params.MAX_TRAIN_STEPS:
@@ -87,7 +87,7 @@ def train_model(params, model, dataset_train, dataset_dev, dataset_test, valid_f
             
             try:
                 # run train 
-                b_loss_train = train_step(params, model, b_trans, b_seqN, b_label, optimizer, criterion)
+                b_loss_train = train_step(params, model, b_trans, b_seqMask, b_label, optimizer, criterion)
                 writer.add_scalar('loss/train', b_loss_train, index)
                 
             except Exception as e:
@@ -213,6 +213,8 @@ def main(params,
                       )
 
     model.to(params.DEVICE)
+    if params.ATTENTION:
+        model.memory = model.memory.to(params.DEVICE)
     print("Initialization done!")
 
     valid_freq = int( len(dataset_train) * params.EPOCH_PER_VALID_FREQ / float(params.BATCH_SIZE)  ) + 1
@@ -238,8 +240,8 @@ if __name__ == '__main__':
     p.add_argument('--num_layer_text', type=int, default=1)
     p.add_argument('--hidden_dim_text', type=int, default=50)
     p.add_argument('--dr_text', type=float, default=1.0)
+    p.add_argument('--attn_text', type=int, default=0)
     args = p.parse_args()
-
 
     _params = Params()
     
@@ -252,6 +254,7 @@ if __name__ == '__main__':
     _params.NUM_LAYER    = args.num_layer_text
     _params.HIDDEN_DIM   = args.hidden_dim_text
     _params.DR           = args.dr_text
+    _params.ATTENTION    = args.attn_text
     _params.DEVICE       = device
     
     if (args.max_train_steps != -1): 
@@ -270,7 +273,8 @@ if __name__ == '__main__':
                     '_LT' + str(args.num_layer_text) + \
                     '_HT' + str(args.hidden_dim_text) + \
                     '_G' + str(args.use_glove) + glove_finetune + \
-                    '_drT' + str(args.dr_text)
+                    '_drT' + str(args.dr_text) + \
+                    '_attnT' + str(args.attn_text)
     
     graph_name = graph_name + '_' + datetime.datetime.now().strftime("%m-%d-%H-%M")
 
@@ -284,10 +288,13 @@ if __name__ == '__main__':
     print('[INFO]-T num_layer:\t', _params.NUM_LAYER)
     print('[INFO]-T hidden_dim:\t', _params.HIDDEN_DIM)
     
-    if args.use_glove == 1:
+    if _params.USE_GLOVE == 1:
         print('[INFO]-Glove Finetune:\t', _params.EMBEDDING_FINETUNE)
     
     print('[INFO]-T dr:\t\t', _params.DR)
+    
+    if _params.ATTENTION: 
+        print('[INFO]-T attention:\t\t', _params.ATTENTION)
 
     main(params = _params,
          is_save = args.is_save,
