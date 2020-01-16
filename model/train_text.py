@@ -201,15 +201,16 @@ def main(params,
 
     params.DIC_SIZE = dataset_train.dic_size
     
-    model = ModelText(dic_size     = params.DIC_SIZE,
-                      embed_dim    = params.EMBED_DIM,
-                      hidden_dim   = params.HIDDEN_DIM,
-                      num_layers   = params.NUM_LAYER,
-                      num_category = params.N_CATEGORY,
-                      dr           = params.DR,
-                      use_glove    = params.USE_GLOVE,
-                      glove_embedding = dataset_train.load_glove(),
-                      embedding_finetune = params.EMBEDDING_FINETUNE
+    model = ModelText(dic_size           = params.DIC_SIZE,
+                      embed_dim          = params.EMBED_DIM,
+                      hidden_dim         = params.HIDDEN_DIM,
+                      num_layers         = params.NUM_LAYER,
+                      num_category       = params.N_CATEGORY,
+                      dr                 = params.DR,
+                      use_glove          = params.USE_GLOVE,
+                      glove_embedding    = dataset_train.load_glove(),
+                      embedding_finetune = params.EMBEDDING_FINETUNE,
+                      use_attention      = params.ATTENTION
                       )
 
     model.to(params.DEVICE)
@@ -294,7 +295,7 @@ if __name__ == '__main__':
     print('[INFO]-T dr:\t\t', _params.DR)
     
     if _params.ATTENTION: 
-        print('[INFO]-T attention:\t\t', _params.ATTENTION)
+        print('[INFO]-T attention:\t', _params.ATTENTION)
 
     main(params = _params,
          is_save = args.is_save,
