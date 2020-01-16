@@ -42,9 +42,9 @@ def evaluate(params, model, data_loader):
 
         for b_trans, b_seqMask, b_label in data_loader:
 
-            b_trans = b_trans.to(params.DEVICE)
+            b_trans   = b_trans.to(params.DEVICE)
             b_seqMask = b_seqMask.to(params.DEVICE)
-            b_label = b_label.to(params.DEVICE)
+            b_label   = b_label.to(params.DEVICE)
             
             try:
                 b_pred = model(b_trans, b_seqMask)

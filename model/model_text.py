@@ -103,13 +103,16 @@ class ModelText(nn.Module):
                                                            )
                                       )
         
-        outputs, output_lengths = pad_packed_sequence(packed_outputs, batch_first=True)
-        valid_len = outputs.shape[1]  # [batch, seqN (vary), dim]
+        outputs, output_lengths = pad_packed_sequence(packed_outputs,
+                                                      batch_first=True,
+                                                      padding_value=0.0,
+                                                      total_length=embed.shape[1]
+                                                     )
         
         if self.use_attention:
             self.query = self.memory.unsqueeze(-1)
             self.key   = outputs
-            self.weighted_sum, self.norm_b_sim = luong_attention(self.key, self.query, seq_mask[:,:valid_len])
+            self.weighted_sum, self.norm_b_sim = luong_attention(self.key, self.query, seq_mask)
             final_output = self.weighted_sum
         
         else:
