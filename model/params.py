@@ -47,7 +47,7 @@ class Params:
     DR           = 0.0
     N_CATEGORY   = 7
     
-    MAX_EARLY_STOP_COUNT   = 12
+    MAX_EARLY_STOP_COUNT   = 7
     EPOCH_PER_VALID_FREQ   = 0.3
     MAX_TRAIN_STEPS = 1000000        # default
     
@@ -57,8 +57,9 @@ class Params:
     USE_GLOVE          = 0
     N_SEQ_MAX_NLP      = 128    # normal 128, ASR 90
     EMBED_DIM          = 100    # when using glove it goes to 300 automatically
-    EMBEDDING_FINETUNE = False  # True is better
+    EMBEDDING_FINETUNE = 0      # True is better
     ATTENTION          = 0      # create an internal memory to attend
+    ATTENTION_MEM_DIM  = 256
     
     
     ################################

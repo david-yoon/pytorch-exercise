@@ -27,7 +27,8 @@ class ModelText(nn.Module):
                  use_glove,
                  glove_embedding = None,
                  embedding_finetune = True,
-                 use_attention=0
+                 use_attention=0,
+                 memory_dim=0
                 ):
         print('[DEBUG][object created] ', self.__class__.__name__)
         
@@ -37,7 +38,8 @@ class ModelText(nn.Module):
         
         if self.use_attention:
             print('[DEBUG] create attention memory, dim: ', hidden_dim)
-            self.memory = torch.randn([1, hidden_dim], requires_grad=True)
+            self.memory = torch.randn([memory_dim], requires_grad=False)
+            self.linear = nn.Linear(memory_dim, hidden_dim)
         
         if use_glove == 1:
             embed_dim = 300
@@ -110,7 +112,7 @@ class ModelText(nn.Module):
                                                      )
         
         if self.use_attention:
-            self.query = self.memory.unsqueeze(-1)
+            self.query = self.linear(self.memory).unsqueeze(0).unsqueeze(-1)
             self.key   = outputs
             self.weighted_sum, self.norm_b_sim = luong_attention(self.key, self.query, seq_mask)
             final_output = self.weighted_sum

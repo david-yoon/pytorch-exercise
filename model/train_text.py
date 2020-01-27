@@ -210,7 +210,8 @@ def main(params,
                       use_glove          = params.USE_GLOVE,
                       glove_embedding    = dataset_train.load_glove(),
                       embedding_finetune = params.EMBEDDING_FINETUNE,
-                      use_attention      = params.ATTENTION
+                      use_attention      = params.ATTENTION,
+                      memory_dim         = params.ATTENTION_MEM_DIM
                       )
 
     model.to(params.DEVICE)
@@ -225,26 +226,31 @@ def main(params,
     
 if __name__ == '__main__':
 
+    _params = Params()
+    
+    
+    
     # Common
     p = argparse.ArgumentParser()
     p.add_argument('--data_path', type=str)
-    p.add_argument('--batch_size', type=int, default=128)
-    p.add_argument('--lr', type=float, default=1e-3)
-    p.add_argument('--max_train_steps', type=int, default=-1)
+    p.add_argument('--batch_size', type=int, default=_params.BATCH_SIZE)
+    p.add_argument('--lr', type=float, default=_params.LR)
+    p.add_argument('--max_train_steps', type=int, default=_params.MAX_TRAIN_STEPS)
     p.add_argument('--is_save', type=int, default=0)
     p.add_argument('--graph_prefix', type=str, default="default")
     
     # Text
-    p.add_argument('--use_glove', type=int, default=0)
-    p.add_argument('--embedding_finetune', type=int, default=1)
-    p.add_argument('--encoder_size_text', type=int, default=750)
-    p.add_argument('--num_layer_text', type=int, default=1)
-    p.add_argument('--hidden_dim_text', type=int, default=50)
-    p.add_argument('--dr_text', type=float, default=1.0)
-    p.add_argument('--attn_text', type=int, default=0)
+    p.add_argument('--use_glove', type=int, default=_params.USE_GLOVE)
+    p.add_argument('--embedding_finetune', type=int, default=_params.EMBEDDING_FINETUNE)
+    p.add_argument('--encoder_size_text', type=int, default=_params.N_SEQ_MAX_NLP)
+    p.add_argument('--num_layer_text', type=int, default=_params.NUM_LAYER)
+    p.add_argument('--hidden_dim_text', type=int, default=_params.HIDDEN_DIM)
+    p.add_argument('--dr_text', type=float, default=_params.DR)
+    p.add_argument('--attn_text', type=int, default=_params.ATTENTION)
+    p.add_argument('--attn_mem_dim_text', type=int, default=_params.ATTENTION_MEM_DIM)
+    
     args = p.parse_args()
 
-    _params = Params()
     
     _params.DATA_PATH    = args.data_path
     _params.BATCH_SIZE   = args.batch_size
@@ -256,7 +262,9 @@ if __name__ == '__main__':
     _params.HIDDEN_DIM   = args.hidden_dim_text
     _params.DR           = args.dr_text
     _params.ATTENTION    = args.attn_text
+    _params.ATTENTION_MEM_DIM = args.attn_mem_dim_text
     _params.DEVICE       = device
+    
     
     if (args.max_train_steps != -1): 
         _params.MAX_TRAIN_STEPS = args.max_train_steps
@@ -274,8 +282,12 @@ if __name__ == '__main__':
                     '_LT' + str(args.num_layer_text) + \
                     '_HT' + str(args.hidden_dim_text) + \
                     '_G' + str(args.use_glove) + glove_finetune + \
-                    '_drT' + str(args.dr_text) + \
-                    '_attnT' + str(args.attn_text)
+                    '_drT' + str(args.dr_text)
+                    
+    if args.attn_text:
+        graph_name = graph_name + \
+                    '_attnT' + str(args.attn_text) + \
+                    '_attnMT' + str(args.attn_mem_dim_text)
     
     graph_name = graph_name + '_' + datetime.datetime.now().strftime("%m-%d-%H-%M")
 
@@ -296,6 +308,7 @@ if __name__ == '__main__':
     
     if _params.ATTENTION: 
         print('[INFO]-T attention:\t', _params.ATTENTION)
+        print('[INFO]-T attention Mem:\t', _params.ATTENTION_MEM_DIM)
 
     main(params = _params,
          is_save = args.is_save,
